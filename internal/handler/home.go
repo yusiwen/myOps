@@ -176,6 +176,10 @@ func splitRepo(s string) []string {
 }
 
 func skeletonHTML(selfURL string) string {
+	sep := "?"
+	if strings.Contains(selfURL, "?") {
+		sep = "&"
+	}
 	return `<div class="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500">
   <svg class="animate-spin h-8 w-8 mr-3" viewBox="0 0 24 24" fill="none">
     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -183,7 +187,7 @@ func skeletonHTML(selfURL string) string {
   </svg>
   <span>Loading...</span>
 </div>
-<div hx-get="` + selfURL + `?partial=1" hx-trigger="load delay:50ms" hx-target="#main" hx-swap="innerHTML" hx-push-url="false"></div>`
+<div hx-get="` + selfURL + sep + `partial=1" hx-trigger="load delay:50ms" hx-target="#main" hx-swap="innerHTML" hx-push-url="false"></div>`
 }
 
 func timeFmt(ts int64) string {

@@ -58,6 +58,9 @@ Links that include `?partial=1` in `hx-get` MUST have an explicit `hx-push-url` 
 | **Always** explicit clean `hx-push-url` | Browser history stays clean; F5 always renders the full page |
 | `hx-push-url="true"` is safe on base links without `?partial=1` | Sidebar links (`/dashboard`, `/repos`, `/builds`, `/settings`) have no query params |
 | `hx-push-url="false"` for search inputs and skeleton triggers | These don't need URL history entries |
+| **Never** hardcode `?partial=1` in skeleton / loading triggers | SelfURL may already have query params; two `?` in one URL breaks the request |
+| **Use `hx-vals='{"partial":"1"}'`** in HTML skeleton triggers (`base.html`) | HTMX handles `?` vs `&` automatically |
+| **In Go `skeletonHTML()`, detect `?` via `strings.Contains`** to choose `?` or `&` | Go-side skeleton fragments need the same protection |
 
 ### Correct examples
 
@@ -68,7 +71,7 @@ Links that include `?partial=1` in `hx-get` MUST have an explicit `hx-push-url` 
 | Pagination | `/builds?page=2&partial=1` | `"/builds?page=2"` |
 | Back link | `/repos?partial=1` | `"/repos"` |
 | Search input | `/repos?partial=1` | `"false"` |
-| Skeleton auto-trigger | `{SelfURL}?partial=1` | `"false"` |
+| Skeleton auto-trigger | `{SelfURL}` + `hx-vals='{"partial":"1"}'` | `"false"` |
 
 ## Build & Dev
 

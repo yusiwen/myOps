@@ -102,7 +102,7 @@
         </svg>
         <span>Loading...</span>
       </div>
-      <div hx-get="{{ .SelfURL }}?partial=1"
+      <div hx-get="{{ .SelfURL }}" hx-vals='{"partial":"1"}'
            hx-trigger="load delay:50ms"
            hx-target="#main"
            hx-swap="innerHTML"
