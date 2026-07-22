@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -102,27 +103,36 @@ func (h *BuildHandler) List(w http.ResponseWriter, r *http.Request) {
 				created int64
 			}
 			var all []buildRow
+			var mu sync.Mutex
+			var wg sync.WaitGroup
 
 			for _, repo := range repos {
 				if repo.Counter > 0 {
-					builds, err := h.drone.ListBuilds(repo.Namespace, repo.Name)
-					if err != nil {
-						continue
-					}
-					for _, b := range builds {
-						all = append(all, buildRow{
-							Owner:   repo.Namespace,
-							Repo:    repo.Name,
-							Number:  b.Number,
-							Event:   b.Event,
-							Status:  b.Status,
-							Branch:  b.Target,
-							Author:  b.Author,
-							created: b.Created,
-						})
-					}
+					wg.Add(1)
+					go func(owner, repo string) {
+						defer wg.Done()
+						builds, err := h.drone.ListBuilds(owner, repo)
+						if err != nil {
+							return
+						}
+						mu.Lock()
+						for _, b := range builds {
+							all = append(all, buildRow{
+								Owner:   owner,
+								Repo:    repo,
+								Number:  b.Number,
+								Event:   b.Event,
+								Status:  b.Status,
+								Branch:  b.Target,
+								Author:  b.Author,
+								created: b.Created,
+							})
+						}
+						mu.Unlock()
+					}(repo.Namespace, repo.Name)
 				}
 			}
+			wg.Wait()
 
 			sort.Slice(all, func(i, j int) bool {
 				return all[i].created > all[j].created

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/yusiwen/myops/internal/drone"
@@ -110,28 +111,37 @@ func (h *HomeHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 
 			if len(needBuildLast) > 0 {
 				h.log.Info("[dashboard] fetching BuildLast for %d repos", len(needBuildLast))
+				var mu sync.Mutex
+				var wg sync.WaitGroup
 				for _, ns := range needBuildLast {
 					parts := splitRepo(ns)
 					if len(parts) < 2 {
 						continue
 					}
-					b, err := h.drone.BuildLast(parts[0], parts[1])
-					if err != nil {
-						continue
-					}
-					if b != nil && b.Number > 0 {
-						builds = append(builds, buildRow{
-							Owner:   parts[0],
-							Repo:    parts[1],
-							Number:  b.Number,
-							Event:   b.Event,
-							Status:  b.Status,
-							Branch:  b.Target,
-							Author:  b.Author,
-							created: b.Created,
-						})
-					}
+					wg.Add(1)
+					go func(owner, repo string) {
+						defer wg.Done()
+						b, err := h.drone.BuildLast(owner, repo)
+						if err != nil {
+							return
+						}
+						if b != nil && b.Number > 0 {
+							mu.Lock()
+							builds = append(builds, buildRow{
+								Owner:   owner,
+								Repo:    repo,
+								Number:  b.Number,
+								Event:   b.Event,
+								Status:  b.Status,
+								Branch:  b.Target,
+								Author:  b.Author,
+								created: b.Created,
+							})
+							mu.Unlock()
+						}
+					}(parts[0], parts[1])
 				}
+				wg.Wait()
 			}
 
 			sort.Slice(builds, func(i, j int) bool {
