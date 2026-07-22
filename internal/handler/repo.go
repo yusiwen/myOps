@@ -190,7 +190,7 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 	if repo.Empty {
 		fileErr = "Empty repository"
 	} else {
-		entries, err := h.gitea.ListContents(owner, name, repo.DefaultBranch, "/")
+		entries, err := h.gitea.ListContents(owner, name, "", "/")
 		if err != nil {
 			fileErr = err.Error()
 			h.log.Error("[repos] ListContents %s/%s: %v", owner, name, err)
