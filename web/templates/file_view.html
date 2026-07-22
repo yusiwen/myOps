@@ -1,0 +1,30 @@
+{{ define "content" }}
+<div class="mb-6">
+  <a href="/repos/{{ .Owner }}/{{ .Name }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+     hx-get="/repos/{{ .Owner }}/{{ .Name }}?partial=1" hx-target="#main" hx-push-url="/repos/{{ .Owner }}/{{ .Name }}">
+    &larr; {{ .Owner }}/{{ .Name }}
+  </a>
+  <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 flex-wrap mt-1">
+    {{ range .Breadcrumb }}
+    {{ if .IsLast }}
+    <span class="text-gray-900 dark:text-gray-100 font-medium break-all">{{ .Label }}</span>
+    {{ else }}
+    <a href="/repos/{{ $.Owner }}/{{ $.Name }}{{ if .Path }}?path={{ .Path }}{{ end }}"
+       class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap"
+       hx-get="/repos/{{ $.Owner }}/{{ $.Name }}?partial=1{{ if .Path }}&path={{ .Path }}{{ end }}"
+       hx-target="#main"
+       hx-push-url="/repos/{{ $.Owner }}/{{ $.Name }}{{ if .Path }}?path={{ .Path }}{{ end }}">
+      {{ .Label }}
+    </a>
+    <span class="shrink-0">/</span>
+    {{ end }}
+    {{ end }}
+  </div>
+  <p class="text-xs text-gray-500 mt-1">{{ .Size }}</p>
+</div>
+<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+  <div class="p-0 overflow-x-auto">
+    {{ .Content }}
+  </div>
+</div>
+{{ end }}

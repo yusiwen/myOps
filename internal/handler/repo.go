@@ -23,6 +23,7 @@ type RepoHandler struct {
 	log        *applog.Logger
 	listTmpl   *template.Template
 	detailTmpl *template.Template
+	fileTmpl   *template.Template
 }
 
 func NewRepoHandler(gitea *gitea.Client, render code.CodeRenderer, logger *applog.Logger) *RepoHandler {
@@ -32,6 +33,7 @@ func NewRepoHandler(gitea *gitea.Client, render code.CodeRenderer, logger *applo
 		log:        logger,
 		listTmpl:   template.Must(template.ParseFiles("web/templates/base.html", "web/templates/repo_list.html")),
 		detailTmpl: template.Must(template.ParseFiles("web/templates/base.html", "web/templates/repo_detail.html")),
+		fileTmpl:   template.Must(template.ParseFiles("web/templates/base.html", "web/templates/file_view.html")),
 	}
 }
 
@@ -233,26 +235,50 @@ func (h *RepoHandler) File(w http.ResponseWriter, r *http.Request) {
 	owner := chi.URLParam(r, "owner")
 	name := chi.URLParam(r, "name")
 	filepath := r.URL.Query().Get("path")
+	user := middleware.GetUser(r)
+	partial := r.URL.Query().Get("partial") == "1"
 
-	repo, err := h.gitea.GetRepo(owner, name)
-	if err != nil {
-		http.Error(w, "repo not found", http.StatusNotFound)
+	if !partial {
+		selfURL := "/repos/" + owner + "/" + name + "/file?path=" + filepath
+		if r.Header.Get("HX-Request") == "true" {
+			w.Write([]byte(skeletonHTML(selfURL)))
+			return
+		}
+		h.fileTmpl.Execute(w, map[string]interface{}{
+			"User": user, "Loading": true, "SelfURL": selfURL,
+		})
 		return
 	}
 
-	_ = repo
-
-	content := fmt.Sprintf("file: %s/%s/%s\n\n(content placeholder)", owner, name, filepath)
-	highlighted := strings.Builder{}
-	formatted, err := h.render.Render(filepath, []byte(content))
-	if err == nil {
-		highlighted.WriteString(string(formatted.HTML))
-	} else {
-		highlighted.WriteString(string(content))
+	text, err := h.gitea.GetFileContent(owner, name, "", filepath)
+	if err != nil {
+		h.log.Error("[repos] GetFileContent %s/%s: %v", owner, name, err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(highlighted.String()))
+	result, err := h.render.Render(filepath, []byte(text))
+	if err != nil {
+		h.log.Error("[repos] Render %s: %v", filepath, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"User":       user,
+		"Owner":      owner,
+		"Name":       name,
+		"Path":       filepath,
+		"Content":    template.HTML(result.HTML),
+		"Size":       fmt.Sprintf("%d bytes", len(text)),
+		"Breadcrumb": buildBreadcrumb(owner, name, filepath)[1:],
+	}
+
+	if r.Header.Get("HX-Request") == "true" {
+		h.fileTmpl.ExecuteTemplate(w, "content", data)
+		return
+	}
+	h.fileTmpl.Execute(w, data)
 }
 
 type breadcrumbItem struct {

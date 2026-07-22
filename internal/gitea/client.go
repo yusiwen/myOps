@@ -1,6 +1,8 @@
 package gitea
 
 import (
+	"encoding/base64"
+	"fmt"
 	"net/url"
 	"strconv"
 	"time"
@@ -115,6 +117,25 @@ func (c *Client) ListContents(owner, name, ref, path string) ([]*gitea_sdk.Conte
 	}
 	c.log.Info("[gitea] ListContents %s/%s ref=%s path=%s → %d entries (%v)", owner, name, ref, path, len(entries), time.Since(start))
 	return entries, nil
+}
+
+func (c *Client) GetFileContent(owner, name, ref, path string) (string, error) {
+	start := time.Now()
+	resp, _, err := c.sdk.GetContents(owner, name, ref, path)
+	if err != nil {
+		c.log.Info("[gitea] GetContents %s/%s path=%s → %v (%v)", owner, name, path, err, time.Since(start))
+		return "", err
+	}
+	if resp.Content == nil {
+		c.log.Info("[gitea] GetContents %s/%s path=%s → empty (%v)", owner, name, path, time.Since(start))
+		return "", fmt.Errorf("not a file")
+	}
+	data, err := base64.StdEncoding.DecodeString(*resp.Content)
+	if err != nil {
+		return "", err
+	}
+	c.log.Info("[gitea] GetContents %s/%s path=%s → %d bytes (%v)", owner, name, path, len(data), time.Since(start))
+	return string(data), nil
 }
 
 func (c *Client) GetRepo(owner, name string) (*gitea_sdk.Repository, error) {
