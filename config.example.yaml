@@ -1,0 +1,26 @@
+# myOps configuration
+# Load priority:
+#   1. --config / -c flag      (explicit, must exist)
+#   2. CONFIG_FILE env var      (explicit, must exist)
+#   3. config.yaml              (auto-detect)
+#   4. ~/.config/myops/config.yaml
+#   5. /etc/myops/config.yaml
+#   6. Environment variables    (fallback)
+#
+# Environment variables always override YAML values.
+
+listen_addr: ":9090"              # LISTEN_ADDR — server listen address
+base_url: "http://localhost:9090" # BASE_URL — myOps public-facing URL (used as OAuth2 redirect base)
+log_file: "myops.log"             # LOG_FILE — detailed log file path
+
+session_key: ""                   # SESSION_KEY — cookie encryption key (required)
+
+gitea:
+  url: ""                         # GITEA_URL — Gitea server base URL
+  token: ""                       # GITEA_TOKEN — service-level personal access token (read:repository, read:user)
+  client_id: ""                   # GITEA_CLIENT_ID — OAuth2 application client ID
+  client_secret: ""               # GITEA_CLIENT_SECRET — OAuth2 application client secret
+
+drone:
+  url: ""                         # DRONE_URL — Drone server base URL
+  token: ""                       # DRONE_TOKEN — Drone admin/service token

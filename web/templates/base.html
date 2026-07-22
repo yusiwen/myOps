@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ dark: localStorage.getItem('dark') === 'true' }" :class="dark ? 'dark' : ''">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>myOps</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
+  <link href="/static/css/tailwind.css" rel="stylesheet">
+  <link href="/static/css/chroma.css" rel="stylesheet">
+  <style>
+    .dark { color-scheme: dark; }
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="bg-surface dark:bg-surface-dark text-gray-900 dark:text-gray-100 h-screen overflow-hidden flex">
+  {{ if .User }}
+  <aside class="w-56 bg-sidebar dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0">
+    <div class="h-14 flex items-center px-5 border-b border-gray-200 dark:border-gray-700">
+      <h1 class="text-lg font-bold">myOps</h1>
+    </div>
+    <nav class="flex-1 py-4 px-3 space-y-1">
+      <a href="/"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+         hx-get="/dashboard" hx-target="#main" hx-push-url="true">
+        <span>Dashboard</span>
+      </a>
+      <a href="/repos"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+         hx-get="/repos" hx-target="#main" hx-push-url="true">
+        <span>Repositories</span>
+      </a>
+      <a href="/builds"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+         hx-get="/builds" hx-target="#main" hx-push-url="true">
+        <span>Builds</span>
+      </a>
+    </nav>
+    <div class="px-3 pb-4">
+      <a href="/settings"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+         hx-get="/settings" hx-target="#main" hx-push-url="true">
+        <span>Settings</span>
+      </a>
+    </div>
+  </aside>
+  {{ end }}
+  <div class="flex-1 flex flex-col min-w-0">
+    {{ if .User }}
+    <header class="h-14 bg-topbar dark:bg-topbar-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-end px-6 gap-4 shrink-0">
+      <button @click="dark = !dark; localStorage.setItem('dark', dark)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+        <svg x-show="!dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        <svg x-show="dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      </button>
+      <div x-data="{ open: false }" class="relative">
+        <button @click="open = !open" class="flex items-center gap-2 text-sm">
+          <span>{{ .User.Login }}</span>
+        </button>
+        <div x-show="open" @click.outside="open = false" x-cloak class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
+          <a href="/settings" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+             hx-get="/settings" hx-target="#main" hx-push-url="true" @click="open = false">Settings</a>
+          <a href="/auth/logout" class="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700" @click="open = false">Sign out</a>
+        </div>
+      </div>
+    </header>
+    {{ end }}
+    <main id="main" class="flex-1 p-6 overflow-auto">
+      {{ if .Loading }}
+      <div class="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500">
+        <svg class="animate-spin h-8 w-8 mr-3" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        <span>Loading...</span>
+      </div>
+      <div hx-get="{{ .SelfURL }}?partial=1"
+           hx-trigger="load delay:50ms"
+           hx-target="#main"
+           hx-swap="innerHTML"
+           hx-push-url="false"></div>
+      {{ else }}
+      {{ block "content" . }}{{ end }}
+      {{ end }}
+    </main>
+  </div>
+</body>
+</html>

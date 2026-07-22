@@ -1,0 +1,69 @@
+{{ define "content" }}
+<h2 class="text-2xl font-bold mb-6">Settings</h2>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <h3 class="text-lg font-semibold mb-4">Gitea Connection</h3>
+    <div class="space-y-3 text-sm">
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Server URL</span>
+        <p class="font-mono mt-0.5">{{ .GiteaURL }}</p>
+      </div>
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Authentication</span>
+        <p class="mt-0.5">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            OAuth2
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <h3 class="text-lg font-semibold mb-4">Drone Connection</h3>
+    <div class="space-y-3 text-sm">
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Server URL</span>
+        <p class="font-mono mt-0.5">{{ .DroneURL }}</p>
+      </div>
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Service Token</span>
+        <p class="font-mono mt-0.5">{{ .DroneToken }}</p>
+      </div>
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Authorization</span>
+        <p class="mt-0.5">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+            Shared service token
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <h3 class="text-lg font-semibold mb-4">User</h3>
+    <div class="space-y-3 text-sm">
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Login</span>
+        <p class="mt-0.5">{{ .User.Login }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <h3 class="text-lg font-semibold mb-4">About</h3>
+    <div class="space-y-3 text-sm">
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">myOps</span>
+        <p class="mt-0.5">Unified dashboard for Gitea &amp; Drone</p>
+      </div>
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Configuration</span>
+        <p class="mt-0.5">All settings are managed via environment variables or <code class="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">config.yaml</code></p>
+      </div>
+    </div>
+  </div>
+</div>
+{{ end }}

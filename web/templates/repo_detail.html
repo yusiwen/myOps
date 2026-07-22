@@ -1,0 +1,47 @@
+{{ define "content" }}
+<div class="mb-6">
+  <a href="/repos" class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+     hx-get="/repos?partial=1" hx-target="#main" hx-push-url="true">
+    &larr; Repositories
+  </a>
+  <h2 class="text-2xl font-bold mt-1">{{ .Owner }}/{{ .Name }}</h2>
+  <p class="text-gray-500 dark:text-gray-400 mt-1">{{ .Description }}</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2">
+    <h3 class="text-lg font-semibold mb-4">Files</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+      <div class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+        {{ range .Files }}
+        <div class="px-4 py-2.5 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+          <span class="text-gray-500">{{ .Name }}</span>
+          <span class="ml-auto text-xs text-gray-400">{{ .Size }}</span>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+  <div>
+    <h3 class="text-lg font-semibold mb-4">Details</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3 text-sm">
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Default branch</span>
+        <p class="font-mono">{{ .DefaultBranch }}</p>
+      </div>
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Visibility</span>
+        <p>{{ .Visibility }}</p>
+      </div>
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Language</span>
+        <p>{{ .Language }}</p>
+      </div>
+      <div>
+        <span class="text-gray-500 dark:text-gray-400">Clone</span>
+        <p class="font-mono text-xs break-all">{{ .CloneURL }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{{ end }}

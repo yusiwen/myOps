@@ -1,0 +1,67 @@
+{{ define "content" }}
+<h2 class="text-2xl font-bold mb-6">Builds</h2>
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
+        <th class="px-4 py-3 font-medium">#</th>
+        <th class="px-4 py-3 font-medium">Repository</th>
+        <th class="px-4 py-3 font-medium">Event</th>
+        <th class="px-4 py-3 font-medium">Status</th>
+        <th class="px-4 py-3 font-medium">Branch</th>
+        <th class="px-4 py-3 font-medium">Author</th>
+        <th class="px-4 py-3 font-medium">When</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .Builds }}
+      <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer"
+          hx-get="/builds/{{ .Owner }}/{{ .Repo }}/{{ .Number }}?partial=1" hx-target="#main" hx-push-url="true">
+        <td class="px-4 py-3 font-mono text-xs text-gray-500">{{ .Number }}</td>
+        <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{{ .Owner }}/{{ .Repo }}</td>
+        <td class="px-4 py-3">{{ .Event }}</td>
+        <td class="px-4 py-3">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+            {{ if eq .Status "success" }}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+            {{ else if eq .Status "failure" }}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+            {{ else if eq .Status "running" }}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+            {{ else }}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{{ end }}">
+            {{ .Status }}
+          </span>
+        </td>
+        <td class="px-4 py-3 font-mono text-xs">{{ .Branch }}</td>
+        <td class="px-4 py-3">{{ .Author }}</td>
+        <td class="px-4 py-3 text-xs text-gray-500">{{ .When }}</td>
+      </tr>
+      {{ else }}
+      <tr><td class="px-4 py-8 text-center text-gray-400" colspan="7">No builds found</td></tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+
+{{ if gt .TotalPages 1 }}
+<div class="flex items-center justify-between mt-4 text-sm">
+  <span class="text-gray-500 dark:text-gray-400">{{ .TotalCount }} builds</span>
+  <div class="flex items-center gap-1">
+    {{ if gt .Page 1 }}
+    <a href="/builds?page={{ .PrevPage }}"
+       class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+       hx-get="/builds?page={{ .PrevPage }}&partial=1" hx-target="#main" hx-push-url="true">
+      Previous
+    </a>
+    {{ end }}
+    <span class="px-3 py-1.5 text-gray-500 dark:text-gray-400">
+      Page {{ .Page }} / {{ .TotalPages }}
+    </span>
+    {{ if lt .Page .TotalPages }}
+    <a href="/builds?page={{ .NextPage }}"
+       class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+       hx-get="/builds?page={{ .NextPage }}&partial=1" hx-target="#main" hx-push-url="true">
+      Next
+    </a>
+    {{ end }}
+  </div>
+</div>
+{{ end }}
+{{ end }}

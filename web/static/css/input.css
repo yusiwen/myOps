@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@config "../../../tailwind.config.js";
+
+.chroma {
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
