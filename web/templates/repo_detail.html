@@ -14,6 +14,22 @@
       <h3 class="text-lg font-semibold">Files</h3>
       <span class="text-xs text-gray-400">{{ .DefaultBranch }}</span>
     </div>
+    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1 flex-wrap">
+      {{ range .Breadcrumb }}
+      {{ if .IsLast }}
+      <span class="text-gray-900 dark:text-gray-100 font-medium">{{ .Label }}</span>
+      {{ else }}
+      <a href="/repos/{{ $.Owner }}/{{ $.Name }}{{ if .Path }}?path={{ .Path }}{{ end }}"
+         class="text-blue-600 dark:text-blue-400 hover:underline"
+         hx-get="/repos/{{ $.Owner }}/{{ $.Name }}?partial=1{{ if .Path }}&path={{ .Path }}{{ end }}"
+         hx-target="#main"
+         hx-push-url="/repos/{{ $.Owner }}/{{ $.Name }}{{ if .Path }}?path={{ .Path }}{{ end }}">
+        {{ .Label }}
+      </a>
+      <span>/</span>
+      {{ end }}
+      {{ end }}
+    </div>
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
       <div class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
         {{ range .Files }}
@@ -26,7 +42,23 @@
             <polyline stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="14,2 14,8 20,8"/>
             {{ end }}
           </svg>
-          <span class="text-gray-900 dark:text-gray-100">{{ .Name }}</span>
+          {{ if .IsDir }}
+          <a href="/repos/{{ $.Owner }}/{{ $.Name }}?path={{ .Path }}"
+             class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+             hx-get="/repos/{{ $.Owner }}/{{ $.Name }}?partial=1&path={{ .Path }}"
+             hx-target="#main"
+             hx-push-url="/repos/{{ $.Owner }}/{{ $.Name }}?path={{ .Path }}">
+            {{ .Name }}
+          </a>
+          {{ else }}
+          <a href="/repos/{{ $.Owner }}/{{ $.Name }}/file?path={{ .Path }}"
+             class="text-gray-900 dark:text-gray-100 hover:underline"
+             hx-get="/repos/{{ $.Owner }}/{{ $.Name }}/file?path={{ .Path }}&partial=1"
+             hx-target="#main"
+             hx-push-url="/repos/{{ $.Owner }}/{{ $.Name }}/file?path={{ .Path }}">
+            {{ .Name }}
+          </a>
+          {{ end }}
           <span class="ml-auto text-xs text-gray-400">{{ .Size }}</span>
         </div>
         {{ else }}

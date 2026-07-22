@@ -174,11 +174,17 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type fileItem struct {
-		Name   string
-		Size   string
-		IsDir  bool
-		Svg    string
+		Name  string
+		Path  string
+		Size  string
+		IsDir bool
 	}
+
+	path := r.URL.Query().Get("path")
+	if path == "" {
+		path = "/"
+	}
+	breadcrumb := buildBreadcrumb(owner, name, path)
 
 	vis := "public"
 	if repo.Private {
@@ -190,7 +196,7 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 	if repo.Empty {
 		fileErr = "Empty repository"
 	} else {
-		entries, err := h.gitea.ListContents(owner, name, "", "/")
+		entries, err := h.gitea.ListContents(owner, name, "", path)
 		if err != nil {
 			fileErr = err.Error()
 			h.log.Error("[repos] ListContents %s/%s: %v", owner, name, err)
@@ -198,6 +204,7 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 			for _, e := range entries {
 				files = append(files, fileItem{
 					Name:  e.Name,
+					Path:  e.Path,
 					Size:  fmtSize(e.Size),
 					IsDir: e.Type == "dir",
 				})
@@ -216,6 +223,8 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		"CloneURL":      repo.CloneURL,
 		"Files":         files,
 		"FileError":     fileErr,
+		"Breadcrumb":    breadcrumb,
+		"Path":          path,
 	}
 	h.detailTmpl.ExecuteTemplate(w, "content", data)
 }
@@ -244,6 +253,34 @@ func (h *RepoHandler) File(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(highlighted.String()))
+}
+
+type breadcrumbItem struct {
+	Label  string
+	Path   string
+	IsLast bool
+}
+
+func buildBreadcrumb(owner, name, path string) []breadcrumbItem {
+	items := []breadcrumbItem{{Label: owner + "/" + name, Path: ""}}
+	if path == "" || path == "/" {
+		items[0].IsLast = true
+		return items
+	}
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	current := ""
+	for i, part := range parts {
+		if current != "" {
+			current += "/"
+		}
+		current += part
+		items = append(items, breadcrumbItem{
+			Label:  part,
+			Path:   "/" + current,
+			IsLast: i == len(parts)-1,
+		})
+	}
+	return items
 }
 
 func fmtSize(bytes int64) string {
