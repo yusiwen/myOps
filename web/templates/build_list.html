@@ -16,7 +16,7 @@
     <tbody>
       {{ range .Builds }}
       <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer"
-          hx-get="/builds/{{ .Owner }}/{{ .Repo }}/{{ .Number }}?partial=1" hx-target="#main" hx-push-url="true">
+          hx-get="/builds/{{ .Owner }}/{{ .Repo }}/{{ .Number }}?partial=1" hx-target="#main" hx-push-url="/builds/{{ .Owner }}/{{ .Repo }}/{{ .Number }}">          
         <td class="px-4 py-3 font-mono text-xs text-gray-500">{{ .Number }}</td>
         <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{{ .Owner }}/{{ .Repo }}</td>
         <td class="px-4 py-3">{{ .Event }}</td>
@@ -47,7 +47,7 @@
     {{ if gt .Page 1 }}
     <a href="/builds?page={{ .PrevPage }}"
        class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-       hx-get="/builds?page={{ .PrevPage }}&partial=1" hx-target="#main" hx-push-url="true">
+       hx-get="/builds?page={{ .PrevPage }}&partial=1" hx-target="#main" hx-push-url="/builds?page={{ .PrevPage }}">
       Previous
     </a>
     {{ end }}
@@ -57,7 +57,7 @@
     {{ if lt .Page .TotalPages }}
     <a href="/builds?page={{ .NextPage }}"
        class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-       hx-get="/builds?page={{ .NextPage }}&partial=1" hx-target="#main" hx-push-url="true">
+       hx-get="/builds?page={{ .NextPage }}&partial=1" hx-target="#main" hx-push-url="/builds?page={{ .NextPage }}">
       Next
     </a>
     {{ end }}

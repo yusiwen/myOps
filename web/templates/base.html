@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ dark: localStorage.getItem('dark') === 'true' }" :class="dark ? 'dark' : ''">
+<html lang="en" x-data="{ dark: localStorage.getItem('dark') === 'true', collapsed: localStorage.getItem('sidebar') === 'true' }" :class="dark ? 'dark' : ''">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,36 +11,65 @@
   <style>
     .dark { color-scheme: dark; }
     [x-cloak] { display: none !important; }
+    .sidebar { transition: width 0.2s ease-in-out; }
   </style>
 </head>
 <body class="bg-surface dark:bg-surface-dark text-gray-900 dark:text-gray-100 h-screen overflow-hidden flex">
   {{ if .User }}
-  <aside class="w-56 bg-sidebar dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0">
-    <div class="h-14 flex items-center px-5 border-b border-gray-200 dark:border-gray-700">
-      <h1 class="text-lg font-bold">myOps</h1>
+  <aside class="sidebar bg-sidebar dark:bg-sidebar-dark border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0 overflow-hidden"
+         :class="collapsed ? 'w-16' : 'w-56'">
+    <div class="h-14 flex items-center px-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
+      <button @click="collapsed = !collapsed; localStorage.setItem('sidebar', collapsed)" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path x-show="!collapsed" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7"/>
+          <path x-show="collapsed" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <h1 x-show="!collapsed" class="text-lg font-bold ml-2 whitespace-nowrap">myOps</h1>
     </div>
     <nav class="flex-1 py-4 px-3 space-y-1">
       <a href="/"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap"
+         :class="collapsed ? 'justify-center' : ''"
          hx-get="/dashboard" hx-target="#main" hx-push-url="true">
-        <span>Dashboard</span>
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="14" y="3" width="7" height="7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="14" width="7" height="7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="14" y="14" width="7" height="7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span x-show="!collapsed">Dashboard</span>
       </a>
       <a href="/repos"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap"
+         :class="collapsed ? 'justify-center' : ''"
          hx-get="/repos" hx-target="#main" hx-push-url="true">
-        <span>Repositories</span>
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+        </svg>
+        <span x-show="!collapsed">Repositories</span>
       </a>
       <a href="/builds"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap"
+         :class="collapsed ? 'justify-center' : ''"
          hx-get="/builds" hx-target="#main" hx-push-url="true">
-        <span>Builds</span>
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke-width="2"/>
+          <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
+        </svg>
+        <span x-show="!collapsed">Builds</span>
       </a>
     </nav>
     <div class="px-3 pb-4">
       <a href="/settings"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+         class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 whitespace-nowrap"
+         :class="collapsed ? 'justify-center' : ''"
          hx-get="/settings" hx-target="#main" hx-push-url="true">
-        <span>Settings</span>
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/>
+          <circle cx="12" cy="12" r="3" stroke-width="2"/>
+        </svg>
+        <span x-show="!collapsed">Settings</span>
       </a>
     </div>
   </aside>

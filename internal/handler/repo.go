@@ -174,13 +174,35 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type fileItem struct {
-		Name string
-		Size string
+		Name   string
+		Size   string
+		IsDir  bool
+		Svg    string
 	}
 
 	vis := "public"
 	if repo.Private {
 		vis = "private"
+	}
+
+	var files []fileItem
+	var fileErr string
+	if repo.Empty {
+		fileErr = "Empty repository"
+	} else {
+		entries, err := h.gitea.ListContents(owner, name, repo.DefaultBranch, "/")
+		if err != nil {
+			fileErr = err.Error()
+			h.log.Error("[repos] ListContents %s/%s: %v", owner, name, err)
+		} else {
+			for _, e := range entries {
+				files = append(files, fileItem{
+					Name:  e.Name,
+					Size:  fmtSize(e.Size),
+					IsDir: e.Type == "dir",
+				})
+			}
+		}
 	}
 
 	data := map[string]interface{}{
@@ -192,9 +214,8 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		"Visibility":    vis,
 		"Language":      repo.Language,
 		"CloneURL":      repo.CloneURL,
-		"Files": []fileItem{
-			{Name: "README.md", Size: "—"},
-		},
+		"Files":         files,
+		"FileError":     fileErr,
 	}
 	h.detailTmpl.ExecuteTemplate(w, "content", data)
 }
@@ -223,4 +244,15 @@ func (h *RepoHandler) File(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(highlighted.String()))
+}
+
+func fmtSize(bytes int64) string {
+	switch {
+	case bytes < 1024:
+		return fmt.Sprintf("%d B", bytes)
+	case bytes < 1024*1024:
+		return fmt.Sprintf("%.0f KB", float64(bytes)/1024)
+	default:
+		return fmt.Sprintf("%.1f MB", float64(bytes)/(1024*1024))
+	}
 }

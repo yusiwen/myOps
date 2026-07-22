@@ -1,7 +1,7 @@
 {{ define "content" }}
 <div class="mb-6">
   <a href="/repos" class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-     hx-get="/repos?partial=1" hx-target="#main" hx-push-url="true">
+     hx-get="/repos?partial=1" hx-target="#main" hx-push-url="/repos">
     &larr; Repositories
   </a>
   <h2 class="text-2xl font-bold mt-1">{{ .Owner }}/{{ .Name }}</h2>
@@ -10,13 +10,32 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <div class="lg:col-span-2">
-    <h3 class="text-lg font-semibold mb-4">Files</h3>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold">Files</h3>
+      <span class="text-xs text-gray-400">{{ .DefaultBranch }}</span>
+    </div>
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
       <div class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
         {{ range .Files }}
         <div class="px-4 py-2.5 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-          <span class="text-gray-500">{{ .Name }}</span>
+          <svg class="w-4 h-4 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {{ if .IsDir }}
+            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+            {{ else }}
+            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="14,2 14,8 20,8"/>
+            {{ end }}
+          </svg>
+          <span class="text-gray-900 dark:text-gray-100">{{ .Name }}</span>
           <span class="ml-auto text-xs text-gray-400">{{ .Size }}</span>
+        </div>
+        {{ else }}
+        <div class="px-4 py-8 text-center text-gray-400">
+          {{ if .FileError }}
+          {{ .FileError }}
+          {{ else }}
+          No files found
+          {{ end }}
         </div>
         {{ end }}
       </div>

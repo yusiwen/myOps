@@ -28,7 +28,7 @@
       <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
         <td class="px-4 py-3">
           <a href="/repos/{{ .Owner }}/{{ .Name }}" class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-             hx-get="/repos/{{ .Owner }}/{{ .Name }}?partial=1" hx-target="#main" hx-push-url="true">
+             hx-get="/repos/{{ .Owner }}/{{ .Name }}?partial=1" hx-target="#main" hx-push-url="/repos/{{ .Owner }}/{{ .Name }}">
             {{ .Name }}
           </a>
         </td>

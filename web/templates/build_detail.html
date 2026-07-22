@@ -1,7 +1,7 @@
 {{ define "content" }}
 <div class="mb-6">
    <a href="/builds?partial=1" class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-      hx-get="/builds?partial=1" hx-target="#main" hx-push-url="true">
+      hx-get="/builds?partial=1" hx-target="#main" hx-push-url="/builds">
     &larr; Builds
   </a>
   <h2 class="text-2xl font-bold mt-1">{{ .Owner }}/{{ .Repo }} #{{ .Number }}</h2>

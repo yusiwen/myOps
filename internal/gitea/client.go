@@ -102,6 +102,17 @@ func (c *Client) SearchRepos(keyword string, page, pageSize int) ([]*gitea_sdk.R
 	return repos, total, nil
 }
 
+func (c *Client) ListContents(owner, name, ref, path string) ([]*gitea_sdk.ContentsResponse, error) {
+	start := time.Now()
+	entries, _, err := c.sdk.ListContents(owner, name, ref, path)
+	if err != nil {
+		c.log.Info("[gitea] ListContents %s/%s ref=%s path=%s → %v (%v)", owner, name, ref, path, err, time.Since(start))
+		return nil, err
+	}
+	c.log.Info("[gitea] ListContents %s/%s ref=%s path=%s → %d entries (%v)", owner, name, ref, path, len(entries), time.Since(start))
+	return entries, nil
+}
+
 func (c *Client) GetRepo(owner, name string) (*gitea_sdk.Repository, error) {
 	start := time.Now()
 	repo, _, err := c.sdk.GetRepo(owner, name)

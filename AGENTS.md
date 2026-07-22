@@ -48,6 +48,28 @@ web/
 - No npm — Tailwind standalone CLI, JS libs via CDN
 - Single-binary deployment
 
+## HTMX Link Convention
+
+Links that include `?partial=1` in `hx-get` MUST have an explicit `hx-push-url` with a clean URL that omits `?partial=1`. This prevents F5 from displaying a raw HTML content fragment (source code view) instead of the full page.
+
+| Rule | Why |
+|------|-----|
+| **Never** `hx-push-url="true"` on links with `?partial=1` in `hx-get` | F5 re-requests the address bar URL; `?partial=1` makes the handler return a raw fragment |
+| **Always** explicit clean `hx-push-url` | Browser history stays clean; F5 always renders the full page |
+| `hx-push-url="true"` is safe on base links without `?partial=1` | Sidebar links (`/dashboard`, `/repos`, `/builds`, `/settings`) have no query params |
+| `hx-push-url="false"` for search inputs and skeleton triggers | These don't need URL history entries |
+
+### Correct examples
+
+| Link type | `hx-get` | `hx-push-url` |
+|-----------|----------|---------------|
+| Sidebar navigation | `/dashboard` | `"true"` |
+| Row click to detail | `/builds/o/r/1?partial=1` | `"/builds/o/r/1"` |
+| Pagination | `/builds?page=2&partial=1` | `"/builds?page=2"` |
+| Back link | `/repos?partial=1` | `"/repos"` |
+| Search input | `/repos?partial=1` | `"false"` |
+| Skeleton auto-trigger | `{SelfURL}?partial=1` | `"false"` |
+
 ## Build & Dev
 
 - `make dev` — run with hot-reload
