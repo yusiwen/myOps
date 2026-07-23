@@ -3,3 +3,4 @@ node_modules/
 config.yaml
 web/static/css/tailwind.css
 web/static/css/chroma.css
+*.log
