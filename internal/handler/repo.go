@@ -250,28 +250,36 @@ func (h *RepoHandler) File(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	text, err := h.gitea.GetFileContent(owner, name, "", filepath)
+	fr, err := h.gitea.GetFile(owner, name, "", filepath)
 	if err != nil {
-		h.log.Error("[repos] GetFileContent %s/%s: %v", owner, name, err)
+		h.log.Error("[repos] GetFile %s/%s: %v", owner, name, err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	result, err := h.render.Render(filepath, []byte(text))
+	result, err := h.render.Render(filepath, []byte(fr.Content))
 	if err != nil {
 		h.log.Error("[repos] Render %s: %v", filepath, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	isMarkdown := strings.HasSuffix(filepath, ".md") || strings.HasSuffix(filepath, ".markdown")
+
 	data := map[string]interface{}{
-		"User":       user,
-		"Owner":      owner,
-		"Name":       name,
-		"Path":       filepath,
-		"Content":    template.HTML(result.HTML),
-		"Size":       fmt.Sprintf("%d bytes", len(text)),
-		"Breadcrumb": buildBreadcrumb(owner, name, filepath)[1:],
+		"User":        user,
+		"Owner":       owner,
+		"Name":        name,
+		"Path":        filepath,
+		"Content":     template.HTML(result.HTML),
+		"RawContent":  fr.Content,
+		"Size":        fmt.Sprintf("%d bytes", fr.Size),
+		"Lines":       strings.Count(fr.Content, "\n") + 1,
+		"Breadcrumb":  buildBreadcrumb(owner, name, filepath)[1:],
+		"CommitSHA":   fr.LastSHA,
+		"CommitMsg":   fr.LastMessage,
+		"DownloadURL": fr.DownloadURL,
+		"IsMarkdown":  isMarkdown,
 	}
 
 	if r.Header.Get("HX-Request") == "true" {

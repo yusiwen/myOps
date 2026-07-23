@@ -1,5 +1,6 @@
 {{ define "content" }}
-<div class="mb-6">
+{{ if .Breadcrumb }}
+<div class="mb-4">
   <a href="/repos/{{ .Owner }}/{{ .Name }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
      hx-get="/repos/{{ .Owner }}/{{ .Name }}?partial=1" hx-target="#main" hx-push-url="/repos/{{ .Owner }}/{{ .Name }}">
     &larr; {{ .Owner }}/{{ .Name }}
@@ -20,11 +21,91 @@
     {{ end }}
     {{ end }}
   </div>
-  <p class="text-xs text-gray-500 mt-1">{{ .Size }}</p>
 </div>
+{{ end }}
+
+{{ if or .CommitMsg .CommitSHA }}
+<div class="mb-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-sm">
+  <div class="flex items-center gap-2">
+    {{ if .CommitMsg }}
+    <span class="text-gray-900 dark:text-gray-100 font-medium truncate">{{ .CommitMsg }}</span>
+    {{ end }}
+    {{ if .CommitSHA }}
+    <span class="text-gray-400 dark:text-gray-500 font-mono text-xs shrink-0">{{ slice .CommitSHA 0 7 }}</span>
+    {{ end }}
+    {{ if not .CommitMsg }}
+    <span class="text-gray-500 italic">No commit message available</span>
+    {{ end }}
+  </div>
+</div>
+{{ end }}
+
+<div class="mb-4 flex items-center justify-between text-sm">
+  <div class="text-gray-500 dark:text-gray-400">
+    <span>{{ .Lines }} lines</span>
+    <span class="mx-1">&middot;</span>
+    <span>{{ .Size }}</span>
+  </div>
+  <div class="flex items-center gap-2">
+    {{ if .IsMarkdown }}
+    <button onclick="switchFileView('code')" id="view-btn-code"
+            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 font-medium">
+      Code
+    </button>
+    <button onclick="switchFileView('preview')" id="view-btn-preview"
+            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+      Preview
+    </button>
+    {{ end }}
+    {{ if .DownloadURL }}
+    <a href="{{ .DownloadURL }}" target="_blank" rel="noopener noreferrer"
+       class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+      Raw
+    </a>
+    {{ end }}
+    <button onclick="navigator.clipboard.writeText(document.getElementById('file-raw').textContent)"
+            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+      Copy
+    </button>
+  </div>
+</div>
+
+<pre id="file-raw" class="hidden">{{ .RawContent }}</pre>
+
+{{ if .IsMarkdown }}
+<div id="file-view-code" class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+  <div class="p-0 overflow-x-auto">
+    {{ .Content }}
+  </div>
+</div>
+<div id="file-view-preview" class="hidden bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+  <div id="md-preview" class="prose dark:prose-invert max-w-none text-sm"></div>
+</div>
+<script>
+(function(){
+  var el = document.getElementById('md-preview');
+  if (el && !el.hasAttribute('data-rendered')) {
+    el.setAttribute('data-rendered', '1');
+    var raw = document.getElementById('file-raw');
+    if (raw && typeof marked !== 'undefined') {
+      el.innerHTML = marked.parse(raw.textContent);
+    }
+  }
+})();
+</script>
+<script>
+function switchFileView(view) {
+  document.getElementById('file-view-code').classList.toggle('hidden', view !== 'code');
+  document.getElementById('file-view-preview').classList.toggle('hidden', view !== 'preview');
+  document.getElementById('view-btn-code').className = 'px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700' + (view === 'code' ? ' bg-gray-100 dark:bg-gray-700 font-medium' : ' hover:bg-gray-100 dark:hover:bg-gray-700');
+  document.getElementById('view-btn-preview').className = 'px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700' + (view === 'preview' ? ' bg-gray-100 dark:bg-gray-700 font-medium' : ' hover:bg-gray-100 dark:hover:bg-gray-700');
+}
+</script>
+{{ else }}
 <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
   <div class="p-0 overflow-x-auto">
     {{ .Content }}
   </div>
 </div>
+{{ end }}
 {{ end }}

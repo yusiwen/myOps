@@ -119,23 +119,50 @@ func (c *Client) ListContents(owner, name, ref, path string) ([]*gitea_sdk.Conte
 	return entries, nil
 }
 
-func (c *Client) GetFileContent(owner, name, ref, path string) (string, error) {
+type FileResult struct {
+	Content     string
+	RawContent  string
+	SHA         string
+	LastSHA     string
+	LastMessage string
+	LastAuthor  string
+	LastTime    string
+	DownloadURL string
+	Size        int64
+}
+
+func (c *Client) GetFile(owner, name, ref, path string) (*FileResult, error) {
 	start := time.Now()
 	resp, _, err := c.sdk.GetContents(owner, name, ref, path)
 	if err != nil {
 		c.log.Info("[gitea] GetContents %s/%s path=%s → %v (%v)", owner, name, path, err, time.Since(start))
-		return "", err
+		return nil, err
 	}
 	if resp.Content == nil {
 		c.log.Info("[gitea] GetContents %s/%s path=%s → empty (%v)", owner, name, path, time.Since(start))
-		return "", fmt.Errorf("not a file")
+		return nil, fmt.Errorf("not a file")
 	}
 	data, err := base64.StdEncoding.DecodeString(*resp.Content)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	c.log.Info("[gitea] GetContents %s/%s path=%s → %d bytes (%v)", owner, name, path, len(data), time.Since(start))
-	return string(data), nil
+	r := &FileResult{
+		Content:    string(data),
+		RawContent: string(data),
+		SHA:        resp.SHA,
+		Size:       resp.Size,
+	}
+	if resp.LastCommitSha != nil {
+		r.LastSHA = *resp.LastCommitSha
+	}
+	if resp.LastCommitMessage != nil {
+		r.LastMessage = *resp.LastCommitMessage
+	}
+	if resp.DownloadURL != nil {
+		r.DownloadURL = *resp.DownloadURL
+	}
+	c.log.Info("[gitea] GetContents %s/%s path=%s → %d bytes sha=%s (%v)", owner, name, path, len(data), r.SHA, time.Since(start))
+	return r, nil
 }
 
 func (c *Client) GetRepo(owner, name string) (*gitea_sdk.Repository, error) {
