@@ -186,7 +186,7 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 	if path == "" {
 		path = "/"
 	}
-	breadcrumb := buildBreadcrumb(owner, name, path)
+	breadcrumb := buildBreadcrumb(owner, name, path)[1:]
 
 	vis := "public"
 	if repo.Private {

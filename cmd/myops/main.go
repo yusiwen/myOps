@@ -59,12 +59,12 @@ func main() {
 		logger.Info("[drone] not configured, Drone features disabled")
 	}
 
-	if err := code.GenerateChromaCSS("web/static/css/chroma.css", "github", "monokai"); err != nil {
+	if err := code.GenerateChromaCSS("web/static/css/chroma.css", "github", "dracula"); err != nil {
 		logger.Info("chroma css generation: %v", err)
 	}
 
 	var renderer code.CodeRenderer
-	renderer = code.NewChromaRenderer("github", "monokai")
+	renderer = code.NewChromaRenderer("github", "dracula")
 
 	authHandler := handler.NewAuthHandler(cfg.Gitea.URL, cfg.Gitea.ClientID, cfg.Gitea.ClientSecret, cfg.BaseURL, "myops")
 	homeHandler := handler.NewHomeHandler(giteaClient, droneClient, logger)

@@ -31,7 +31,7 @@ func NewChromaRenderer(light, dark string) *ChromaRenderer {
 	return &ChromaRenderer{
 		lightStyle: ls,
 		darkStyle:  ds,
-		formatter:  html.New(html.WithClasses(true), html.TabWidth(2)),
+		formatter:  html.New(html.WithClasses(true), html.WithLineNumbers(true), html.TabWidth(2)),
 	}
 }
 

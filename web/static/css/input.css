@@ -3,6 +3,22 @@
 @config "../../../tailwind.config.js";
 
 .chroma {
-  border-radius: 0.5rem;
   overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.dark .chroma {
+  background-color: transparent !important;
+}
+
+.chroma .lntd:first-child {
+  padding-right: 0.5rem;
+  vertical-align: top;
+  min-width: 1rem;
+}
+
+.chroma .lntd:last-child {
+  width: 100%;
 }

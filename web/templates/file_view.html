@@ -24,47 +24,43 @@
 </div>
 {{ end }}
 
-{{ if or .CommitMsg .CommitSHA }}
-<div class="mb-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 text-sm">
-  <div class="flex items-center gap-2">
-    {{ if .CommitMsg }}
-    <span class="text-gray-900 dark:text-gray-100 font-medium truncate">{{ .CommitMsg }}</span>
-    {{ end }}
+<div class="mb-3 flex items-center justify-between">
+  <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+    {{ if or .CommitMsg .CommitSHA }}
     {{ if .CommitSHA }}
-    <span class="text-gray-400 dark:text-gray-500 font-mono text-xs shrink-0">{{ slice .CommitSHA 0 7 }}</span>
+    <span class="font-mono text-xs text-gray-400 dark:text-gray-500">{{ slice .CommitSHA 0 7 }}</span>
+    {{ end }}
+    {{ if .CommitMsg }}
+    <span class="truncate max-w-md">{{ .CommitMsg }}</span>
     {{ end }}
     {{ if not .CommitMsg }}
-    <span class="text-gray-500 italic">No commit message available</span>
+    <span class="italic">no commit message</span>
     {{ end }}
-  </div>
-</div>
-{{ end }}
-
-<div class="mb-4 flex items-center justify-between text-sm">
-  <div class="text-gray-500 dark:text-gray-400">
+    <span class="text-gray-300 dark:text-gray-600">|</span>
+    {{ end }}
     <span>{{ .Lines }} lines</span>
-    <span class="mx-1">&middot;</span>
+    <span class="text-gray-300 dark:text-gray-600">|</span>
     <span>{{ .Size }}</span>
   </div>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-1">
     {{ if .IsMarkdown }}
     <button onclick="switchFileView('code')" id="view-btn-code"
-            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 font-medium">
+            class="px-2.5 py-1 text-xs rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
       Code
     </button>
     <button onclick="switchFileView('preview')" id="view-btn-preview"
-            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+            class="px-2.5 py-1 text-xs rounded border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 font-medium">
       Preview
     </button>
     {{ end }}
     {{ if .DownloadURL }}
     <a href="{{ .DownloadURL }}" target="_blank" rel="noopener noreferrer"
-       class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+       class="px-2.5 py-1 text-xs rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
       Raw
     </a>
     {{ end }}
     <button onclick="navigator.clipboard.writeText(document.getElementById('file-raw').textContent)"
-            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+            class="px-2.5 py-1 text-xs rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
       Copy
     </button>
   </div>
@@ -73,12 +69,12 @@
 <pre id="file-raw" class="hidden">{{ .RawContent }}</pre>
 
 {{ if .IsMarkdown }}
-<div id="file-view-code" class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-  <div class="p-0 overflow-x-auto">
+<div id="file-view-code" class="overflow-hidden hidden">
+  <div class="overflow-x-auto">
     {{ .Content }}
   </div>
 </div>
-<div id="file-view-preview" class="hidden bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+<div id="file-view-preview" class="p-6">
   <div id="md-preview" class="prose dark:prose-invert max-w-none text-sm"></div>
 </div>
 <script>
@@ -97,13 +93,13 @@
 function switchFileView(view) {
   document.getElementById('file-view-code').classList.toggle('hidden', view !== 'code');
   document.getElementById('file-view-preview').classList.toggle('hidden', view !== 'preview');
-  document.getElementById('view-btn-code').className = 'px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700' + (view === 'code' ? ' bg-gray-100 dark:bg-gray-700 font-medium' : ' hover:bg-gray-100 dark:hover:bg-gray-700');
-  document.getElementById('view-btn-preview').className = 'px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700' + (view === 'preview' ? ' bg-gray-100 dark:bg-gray-700 font-medium' : ' hover:bg-gray-100 dark:hover:bg-gray-700');
+  document.getElementById('view-btn-code').className = 'px-2.5 py-1 text-xs rounded border border-gray-200 dark:border-gray-700' + (view === 'code' ? ' bg-gray-100 dark:bg-gray-700 font-medium' : ' hover:bg-gray-100 dark:hover:bg-gray-700');
+  document.getElementById('view-btn-preview').className = 'px-2.5 py-1 text-xs rounded border border-gray-200 dark:border-gray-700' + (view === 'preview' ? ' bg-gray-100 dark:bg-gray-700 font-medium' : ' hover:bg-gray-100 dark:hover:bg-gray-700');
 }
 </script>
 {{ else }}
-<div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-  <div class="p-0 overflow-x-auto">
+<div class="overflow-hidden">
+  <div class="overflow-x-auto">
     {{ .Content }}
   </div>
 </div>
