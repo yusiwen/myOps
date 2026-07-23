@@ -165,6 +165,23 @@ func (c *Client) GetFile(owner, name, ref, path string) (*FileResult, error) {
 	return r, nil
 }
 
+func (c *Client) ListBranches(owner, name string) ([]string, error) {
+	start := time.Now()
+	branches, _, err := c.sdk.ListRepoBranches(owner, name, gitea_sdk.ListRepoBranchesOptions{
+		ListOptions: gitea_sdk.ListOptions{PageSize: 100},
+	})
+	if err != nil {
+		c.log.Error("[gitea] ListBranches %s/%s failed: %v", owner, name, err)
+		return nil, err
+	}
+	names := make([]string, len(branches))
+	for i, b := range branches {
+		names[i] = b.Name
+	}
+	c.log.Info("[gitea] ListBranches %s/%s → %d branches (%v)", owner, name, len(names), time.Since(start))
+	return names, nil
+}
+
 func (c *Client) GetRepo(owner, name string) (*gitea_sdk.Repository, error) {
 	start := time.Now()
 	repo, _, err := c.sdk.GetRepo(owner, name)

@@ -156,8 +156,22 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUser(r)
 	partial := r.URL.Query().Get("partial") == "1"
 
+	ref := r.URL.Query().Get("ref")
+
 	if !partial {
 		selfURL := "/repos/" + owner + "/" + name
+		hasParam := false
+		if path := r.URL.Query().Get("path"); path != "" {
+			selfURL += "?path=" + path
+			hasParam = true
+		}
+		if ref != "" {
+			if hasParam {
+				selfURL += "&ref=" + ref
+			} else {
+				selfURL += "?ref=" + ref
+			}
+		}
 		if r.Header.Get("HX-Request") == "true" {
 			w.Write([]byte(skeletonHTML(selfURL)))
 			return
@@ -175,30 +189,37 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type fileItem struct {
-		Name  string
-		Path  string
-		Size  string
-		IsDir bool
-	}
-
 	path := r.URL.Query().Get("path")
 	if path == "" {
 		path = "/"
 	}
-	breadcrumb := buildBreadcrumb(owner, name, path)[1:]
+	var breadcrumb []breadcrumbItem
+	if path != "/" {
+		breadcrumb = buildBreadcrumb(owner, name, path)
+	}
 
 	vis := "public"
 	if repo.Private {
 		vis = "private"
 	}
 
+	branches, _ := h.gitea.ListBranches(owner, name)
+	if ref == "" && len(branches) > 0 {
+		ref = repo.DefaultBranch
+	}
+
+	type fileItem struct {
+		Name  string
+		Path  string
+		Size  string
+		IsDir bool
+	}
 	var files []fileItem
 	var fileErr string
 	if repo.Empty {
 		fileErr = "Empty repository"
 	} else {
-		entries, err := h.gitea.ListContents(owner, name, "", path)
+		entries, err := h.gitea.ListContents(owner, name, ref, path)
 		if err != nil {
 			fileErr = err.Error()
 			h.log.Error("[repos] ListContents %s/%s: %v", owner, name, err)
@@ -227,6 +248,8 @@ func (h *RepoHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		"FileError":     fileErr,
 		"Breadcrumb":    breadcrumb,
 		"Path":          path,
+		"Branches":      branches,
+		"Ref":           ref,
 	}
 	h.detailTmpl.ExecuteTemplate(w, "content", data)
 }
@@ -296,7 +319,7 @@ type breadcrumbItem struct {
 }
 
 func buildBreadcrumb(owner, name, path string) []breadcrumbItem {
-	items := []breadcrumbItem{{Label: owner + "/" + name, Path: ""}}
+	items := []breadcrumbItem{{Label: name, Path: ""}}
 	if path == "" || path == "/" {
 		items[0].IsLast = true
 		return items
