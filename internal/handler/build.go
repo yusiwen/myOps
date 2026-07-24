@@ -214,14 +214,34 @@ func (h *BuildHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		Number  int
 		Message string
 	}
-	var logs []logLine
-	logLines, err := h.drone.GetBuildLogs(owner, name, int(number), 1, 1)
-	if err == nil {
-		for _, l := range logLines {
-			logs = append(logs, logLine{
-				Number:  l.Number,
-				Message: l.Message,
-			})
+	type stepLogs struct {
+		Number int
+		Logs   []logLine
+	}
+	type stageLogs struct {
+		Name  string
+		Steps []stepLogs
+	}
+
+	var stages []stageLogs
+	for _, st := range build.Stages {
+		var steps []stepLogs
+		for step := 1; ; step++ {
+			lines, err := h.drone.GetBuildLogs(owner, name, int(number), st.Number, step)
+			if err != nil || len(lines) == 0 {
+				break
+			}
+			var sl []logLine
+			for _, l := range lines {
+				sl = append(sl, logLine{
+					Number:  l.Number,
+					Message: l.Message,
+				})
+			}
+			steps = append(steps, stepLogs{Number: step, Logs: sl})
+		}
+		if len(steps) > 0 {
+			stages = append(stages, stageLogs{Name: st.Name, Steps: steps})
 		}
 	}
 
@@ -235,7 +255,7 @@ func (h *BuildHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		"Branch":  build.Target,
 		"Author":  build.Author,
 		"Created": created,
-		"Logs":    logs,
+		"Stages":  stages,
 	}
 
 	if r.Header.Get("HX-Request") == "true" {
