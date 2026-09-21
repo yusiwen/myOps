@@ -1,0 +1,21 @@
+# Live-reload configuration for `make dev`.
+# Docs: https://github.com/air-verse/air
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Rebuild Tailwind CSS first so class changes in templates are picked up,
+  # then recompile the binary. myOps resolves web/ relative to the working
+  # directory, so the binary has to run from the project root.
+  cmd = "tailwindcss -i web/static/css/input.css -o web/static/css/tailwind.css && go build -o ./tmp/myops ./cmd/myops"
+  bin = "./tmp/myops"
+  include_ext = ["go", "html"]
+  exclude_dir = ["bin", "tmp", "web/static", ".git", ".direnv"]
+  delay = 300
+  stop_on_error = true
+
+[log]
+  time = true
+
+[misc]
+  clean_on_exit = true

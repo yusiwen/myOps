@@ -1,4 +1,4 @@
-.PHONY: build dev tailwind lint clean
+.PHONY: build dev tailwind lint fmt clean
 
 BINARY=myops
 
@@ -6,14 +6,16 @@ build: tailwind
 	go build -o bin/$(BINARY) ./cmd/myops
 
 dev: tailwind
-	@which air > /dev/null 2>&1 || go install github.com/air-verse/air@latest
 	air
 
 tailwind:
-	npx @tailwindcss/cli -i web/static/css/input.css -o web/static/css/tailwind.css
+	tailwindcss -i web/static/css/input.css -o web/static/css/tailwind.css
 
 lint:
 	golangci-lint run ./...
 
+fmt:
+	nix fmt
+
 clean:
-	rm -rf bin/ web/static/css/tailwind.css node_modules
+	rm -rf bin/ tmp/ web/static/css/tailwind.css

@@ -39,14 +39,20 @@ internal/
 web/
   templates/                  # Go HTML templates
   static/                     # Tailwind CSS, JS
+flake.nix                     # Nix dev shell (pinned toolchain)
+flake.lock                    # Locked nixpkgs revision
+.envrc                        # direnv: `use flake`
+.air.toml                     # air hot-reload rules
 ```
 
 ## Conventions
 
 - All documentation and code comments in English
 - Handler code depends on `CodeRenderer` interface, not concrete implementation
-- No npm — Tailwind standalone CLI, JS libs via CDN
+- No npm — Tailwind standalone CLI from nixpkgs, JS libs via CDN
 - Single-binary deployment
+- `web/templates` and `web/static` are resolved relative to the working
+  directory (no `embed.FS`), so the server must run from the project root
 
 ## HTMX Link Convention
 
@@ -73,10 +79,14 @@ Links that include `?partial=1` in `hx-get` MUST have an explicit `hx-push-url` 
 
 ## Build & Dev
 
-- `make dev` — run with hot-reload
-- `make build` — compile binary
-- `make tailwind` — compile Tailwind CSS
+The toolchain is pinned by the Nix flake. Enter the shell with `direnv allow`
+or `nix develop`; do not assume Go, `air`, or `tailwindcss` exist system-wide.
+
+- `make dev` — run with hot-reload (air, rules in `.air.toml`)
+- `make build` — compile Tailwind CSS + Go binary
+- `make tailwind` — compile Tailwind CSS (standalone CLI, no npm)
 - `make lint` — run golangci-lint
+- `make fmt` — format `*.nix` via `nix fmt`
 
 ## Progress
 
